@@ -1,4 +1,3 @@
-import timm
 from anomalib.data import MVTec
 from anomalib.models import Patchcore
 from anomalib.engine import Engine
