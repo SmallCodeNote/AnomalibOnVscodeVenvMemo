@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.IO;
 using WinFormStringCnvClass;
 
+using MaskImageTool;
 
 namespace subtool
 {
@@ -304,6 +305,17 @@ namespace subtool
                 bitmap.Save(Path.Combine(classDirPath, i.ToString("0000") + ".jpg"), ImageFormat.Jpeg);
             }
 
+        }
+
+        private void button_LoadMaskTarget_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Multiselect = true;
+
+            foreach(string filename in ofd.FileNames)
+            {
+                MaskImage.CreateFromMarkColor(filename);
+            }
         }
     }
 }
