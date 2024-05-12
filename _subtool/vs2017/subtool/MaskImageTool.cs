@@ -12,10 +12,10 @@ namespace MaskImageTool
     {
         static public void CreateFromMarkColor(string targetFilePath)
         {
-            CreateFromMarkColor(targetFilePath, 255, 0, 0);
+            CreateMarkFromColor(targetFilePath, 255, 0, 0);
         }
 
-        static public void CreateFromMarkColor(string targetFilePath,byte mR,byte mG,byte mB)
+        static public void CreateMarkFromColor(string targetFilePath,byte mR,byte mG,byte mB)
         {
             Bitmap originalImage = new Bitmap(targetFilePath);
             Bitmap newImage = new Bitmap(originalImage.Width, originalImage.Height);
@@ -62,5 +62,42 @@ namespace MaskImageTool
             }
             compositeImage.Save(Path.Combine(directory, "x" + oldFileName));
         }
+
+        static public void CreateMarkFromDifference(string baseDataDirPath, string editDataDirPath, string maskDataDirPath, int threshold)
+        {
+            var editFiles = Directory.GetFiles(editDataDirPath, "*.*");
+            foreach (var editFile in editFiles)
+            {
+                var fileName = Path.GetFileName(editFile);
+                var baseFile = Path.Combine(baseDataDirPath, fileName);
+                if (File.Exists(baseFile))
+                {
+                    using (var img1 = new Bitmap(baseFile))
+                    using (var img2 = new Bitmap(editFile))
+                    {
+                        var img3 = new Bitmap(img1.Width, img1.Height);
+                        for (int x = 0; x < img1.Width; x++)
+                        {
+                            for (int y = 0; y < img1.Height; y++)
+                            {
+                                var pixel1 = img1.GetPixel(x, y);
+                                var pixel2 = img2.GetPixel(x, y);
+                                var diff = Math.Abs(pixel1.R - pixel2.R) + Math.Abs(pixel1.G - pixel2.G) + Math.Abs(pixel1.B - pixel2.B);
+                                if (diff >= threshold)
+                                {
+                                    img3.SetPixel(x, y, Color.White);
+                                }
+                                else
+                                {
+                                    img3.SetPixel(x, y, Color.Black);
+                                }
+                            }
+                        }
+                        img3.Save(Path.Combine(maskDataDirPath, fileName));
+                    }
+                }
+            }
+        }
+
     }
 }

@@ -93,7 +93,7 @@ namespace subtool
                 Bitmap bitmap = new Bitmap(imageWidth, imageHeight, PixelFormat.Format24bppRgb);
                 DrawPattern.drawVerticalStripe(bitmap, Color.White, Color.Black, rdm);
                 PictureBoxUpdate(pictureBox1, bitmap);
-                bitmap.Save(Path.Combine(classDirPath, i.ToString("0000") + ".jpg"), ImageFormat.Jpeg);
+                bitmap.Save(Path.Combine(classDirPath, i.ToString("0000") + ".png"), ImageFormat.Png);
             }
 
             classDirPath = Path.Combine(textBox_CreateDirPath.Text, "ng");
@@ -113,8 +113,8 @@ namespace subtool
                 DrawPattern.drawCircle(bitmap1, bitmap2, Color.White, rdm);
                 PictureBoxUpdate(pictureBox1, bitmap1);
 
-                bitmap1.Save(Path.Combine(classDirPath, i.ToString("0000") + ".jpg"), ImageFormat.Jpeg);
-                bitmap2.Save(Path.Combine(classDirPathM, i.ToString("0000") + ".jpg"), ImageFormat.Jpeg);
+                bitmap1.Save(Path.Combine(classDirPath, i.ToString("0000") + ".png"), ImageFormat.Png);
+                bitmap2.Save(Path.Combine(classDirPathM, i.ToString("0000") + ".png"), ImageFormat.Png);
                 bitmap2.Dispose();
             }
 
@@ -312,10 +312,25 @@ namespace subtool
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Multiselect = true;
 
-            foreach(string filename in ofd.FileNames)
+            foreach (string filename in ofd.FileNames)
             {
                 MaskImage.CreateFromMarkColor(filename);
             }
+        }
+
+        private void button_MaskFromDiff_CreateMask_Click(object sender, EventArgs e)
+        {
+            if (!int.TryParse(textBox_MaskFromDiffTh.Text, out int threshold))
+            {
+                threshold = 25;
+            }
+
+            MaskImage.CreateMarkFromDifference(
+                textBox_MaskFromDiff_BaseDataDirPath.Text,
+                textBox_MaskFromDiff_EditDataDirPath.Text,
+                textBox_MaskFromDiff_MaskDataDirPath.Text,
+                threshold);
+
         }
     }
 }
