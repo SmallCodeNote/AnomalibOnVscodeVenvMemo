@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
 
 using OpenCvSharp;
 using Microsoft.ML.OnnxRuntime;
@@ -18,21 +19,31 @@ namespace OnnxRuntime_ImageClassification
 
             int inputWidth = imgSrc.Width;
             int inputHeight = imgSrc.Height;
-            string dstString = RunSessionAndDrawMat(onnxFilePath, imgSrc, ImShow);
+            Bitmap imgMap = new Bitmap(inputWidth,inputHeight);
+            string dstString = "";
+            (dstString, imgMap) = RunSessionAndDrawMap(onnxFilePath, imgSrc, ImShow);
             imgSrc.Dispose();
-
+            imgMap.Dispose();
             return dstString;
         }
 
-        static public string RunSessionAndDrawMat(string onnxFilePath, Mat imgSrc, bool ImShow = false)
+        static public (string, Bitmap) RunSessionAndDrawMap(string onnxFilePath, string imageFilePath, bool ImShow = false)
         {
-            using (var session = new InferenceSession(onnxFilePath))
+            using (Mat imgSrc = new Mat(imageFilePath))
             {
-                return RunSessionAndDrawMat(session, imgSrc, ImShow);
+                return RunSessionAndDrawMap(onnxFilePath, imgSrc, ImShow);
             }
         }
 
-        static public string RunSessionAndDrawMat(InferenceSession session, Mat imgSrc,  bool ImShow = false)
+        static public (string, Bitmap) RunSessionAndDrawMap(string onnxFilePath, Mat imgSrc, bool ImShow = false)
+        {
+            using (var session = new InferenceSession(onnxFilePath))
+            {
+                return RunSessionAndDrawMap(session, imgSrc, ImShow);
+            }
+        }
+
+        static public (string, Bitmap) RunSessionAndDrawMap(InferenceSession session, Mat imgSrc, bool ImShow = false)
         {
             int inputWidth = imgSrc.Width;
             int inputHeight = imgSrc.Height;
@@ -50,11 +61,13 @@ namespace OnnxRuntime_ImageClassification
 
             List<string> LineOutput = new List<string>();
 
+            Mat colorMap = new Mat();
+            Mat colorMixMap = new Mat();
+
             using (var results = session.Run(inputs))
             {
                 Tensor<float> scores = results[1].AsTensor<float>();
 
-                // Process results
                 int indicesLength = (int)scores.Length;
                 for (int i = 0; i < indicesLength; i++)
                 {
@@ -62,46 +75,37 @@ namespace OnnxRuntime_ImageClassification
                     LineOutput.Add(score.ToString("g4"));
                 }
 
-
                 Tensor<float> segmentationImage = results[0].AsTensor<float>();
 
-                // Tensorの次元を取得（高さ、幅）
-                int height = 224;
-                int width = 224;
+                int height = imgSrc.Height;
+                int width = imgSrc.Width;
 
-                // 新しいMatを作成
-                Mat grayscaleImage = new Mat(height, width, MatType.CV_8UC1);
+                Mat floatMap = new Mat(height, width, MatType.CV_32FC1);
 
-                // Tensorの各要素を走査
                 for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
-
-                            // Tensorからピクセル値を取得
-                            float pixelValue = segmentationImage[0,0,0,y*width + x];
-
-                            // ピクセル値を0-255の範囲にスケーリング
-                            byte grayScale = (byte)(pixelValue * 2);
-
-                            // Matに新しいピクセル値を設定
-                            grayscaleImage.Set(y, x, grayScale);
+                        float pixelValue = segmentationImage[0, 0, 0, y * width + x];
+                        floatMap.Set(y, x, pixelValue);
 
                     }
                 }
 
-                // Matを保存
-                Cv2.ImWrite(@"R:\result\grayscaleImage.png", grayscaleImage);
-            }
+                colorMap = floatMap.Normalize(0, 255, NormTypes.MinMax, MatType.CV_8UC1);
+                Cv2.ApplyColorMap(colorMap, colorMap, ColormapTypes.Jet);
+                Cv2.AddWeighted(imgSrc, 0.5, colorMap, 0.5, 0, colorMixMap);
 
-            return string.Join("\t", LineOutput.Take(3).ToArray());
+                colorMap.Dispose();
+            }
+            return (string.Join("\t", LineOutput.Take(3).ToArray()), OpenCvSharp.Extensions.BitmapConverter.ToBitmap( colorMixMap));
         }
 
         static private DenseTensor<float> getDenseTensorFromMat(Mat src, int tensorWidth, int tensorHeight)
         {
             var dstTensor = new DenseTensor<float>(new[] { 1, 3, tensorWidth, tensorHeight });
 
-            Size newSize = new Size(tensorWidth, tensorHeight);
+            OpenCvSharp.Size newSize = new OpenCvSharp.Size(tensorWidth, tensorHeight);
             Mat dst = new Mat();
             Cv2.Resize(src, dst, newSize);
 

@@ -90,11 +90,54 @@ namespace OnnxRuntime_AnomalibInference
             string[] imageFilePaths = textBox_ImageFilesPath.Text.Replace("\r\n", "\n").Trim('\n').Split('\n');
 
             textBox_Result.Text = "";
+            panelImagesReset();
             foreach (var imageFilePath in imageFilePaths)
             {
-                textBox_Result.Text += Path.Combine(Path.GetFileName(Path.GetDirectoryName(imageFilePath)), Path.GetFileNameWithoutExtension(imageFilePath))
-                    + "\t" + OnnxImageClassification.RunSession(onnxFilePath, imageFilePath, ImShow: false) + "\r\n";
+                string Score = "";
+                Bitmap bitmap;
+
+                (Score, bitmap) = OnnxImageClassification.RunSessionAndDrawMap(onnxFilePath, imageFilePath, ImShow: false);
+                string name = Path.Combine(Path.GetFileName(Path.GetDirectoryName(imageFilePath)), Path.GetFileNameWithoutExtension(imageFilePath));
+
+                textBox_Result.Text += name
+                    + "\t" + Score + "\r\n";
+                panelImageAdd(bitmap,name + " : " + Score);
             }
         }
+        private void panelImagesReset()
+        {
+
+            foreach (var control in panel_Images.Controls)
+            {
+                if (control is PictureBox)
+                {
+                    ((PictureBox)control).Image.Dispose();
+                }
+                
+            }
+            panel_Images.Controls.Clear();
+            panel_Images.Height = 0;
+
+        }
+        private void panelImageAdd(Bitmap bitmap,string name)
+        {
+            Label label = new Label();
+            label.Top = panel_Images.Height;
+            label.Text = name;
+
+            PictureBox pictureBox = new PictureBox();
+            pictureBox.Width = panel_Images.Width;
+            pictureBox.Height = (int)((bitmap.Height * panel_Images.Width) / bitmap.Width );
+            pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBox.Image = bitmap;
+            pictureBox.Top = panel_Images.Height+10;
+            
+            panel_Images.Height += pictureBox.Height+10;
+
+            panel_Images.Controls.Add(pictureBox);
+            panel_Images.Controls.Add(label);
+
+        }
+
     }
 }

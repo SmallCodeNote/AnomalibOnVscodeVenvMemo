@@ -36,6 +36,9 @@
             this.button_LoadImageFiles = new System.Windows.Forms.Button();
             this.textBox_OnnxFilePath = new System.Windows.Forms.TextBox();
             this.button_LoadOnnxFilePath = new System.Windows.Forms.Button();
+            this.panel_Images = new System.Windows.Forms.Panel();
+            this.panel_ImagesFrame = new System.Windows.Forms.Panel();
+            this.panel_ImagesFrame.SuspendLayout();
             this.SuspendLayout();
             // 
             // button_Run
@@ -113,11 +116,30 @@
             this.button_LoadOnnxFilePath.UseVisualStyleBackColor = true;
             this.button_LoadOnnxFilePath.Click += new System.EventHandler(this.button_LoadOnnxFilePath_Click);
             // 
+            // panel_Images
+            // 
+            this.panel_Images.AutoScroll = true;
+            this.panel_Images.Location = new System.Drawing.Point(0, 0);
+            this.panel_Images.Name = "panel_Images";
+            this.panel_Images.Size = new System.Drawing.Size(364, 108);
+            this.panel_Images.TabIndex = 12;
+            // 
+            // panel_ImagesFrame
+            // 
+            this.panel_ImagesFrame.AutoScroll = true;
+            this.panel_ImagesFrame.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel_ImagesFrame.Controls.Add(this.panel_Images);
+            this.panel_ImagesFrame.Location = new System.Drawing.Point(510, 27);
+            this.panel_ImagesFrame.Name = "panel_ImagesFrame";
+            this.panel_ImagesFrame.Size = new System.Drawing.Size(391, 529);
+            this.panel_ImagesFrame.TabIndex = 13;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(538, 588);
+            this.ClientSize = new System.Drawing.Size(913, 588);
+            this.Controls.Add(this.panel_ImagesFrame);
             this.Controls.Add(this.button_Run);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -127,9 +149,10 @@
             this.Controls.Add(this.textBox_OnnxFilePath);
             this.Controls.Add(this.button_LoadOnnxFilePath);
             this.Name = "Form1";
-            this.Text = "OnnxRuntime_AnomalibInference";
+            this.Text = "OnnxRuntime_AnomalibPatchCoreInference";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.panel_ImagesFrame.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -145,6 +168,8 @@
         private System.Windows.Forms.Button button_LoadImageFiles;
         private System.Windows.Forms.TextBox textBox_OnnxFilePath;
         private System.Windows.Forms.Button button_LoadOnnxFilePath;
+        private System.Windows.Forms.Panel panel_Images;
+        private System.Windows.Forms.Panel panel_ImagesFrame;
     }
 }
 
