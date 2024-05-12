@@ -1,11 +1,7 @@
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-pip install anomalib timm
-pip install lightning opencv-python imgaug kornia pandas scikit-learn einops FrEIA open-clip-torch wandb openvino
+pip install anomalib lightning opencv-python imgaug kornia pandas scikit-learn einops FrEIA open-clip-torch wandb openvino onnx
 
+#Edit \.venv\Lib\site-packages\anomalib\models\components\filters\blur.py line:67
+        self.kernel.unsqueeze_(0).unsqueeze_(0)
+->        self.kernel.unsqueeze_(0)#.unsqueeze_(0)
 
-#Edit \.venv\Lib\site-packages\anomalib\models\image\patchcore\lightning_model.py line:20
-from anomalib.models.image.patchcore.torch_model import PatchcoreModel
-
-
-#Edit \.venv\Lib\site-packages\anomalib\models\components\filters\blur.py line:68
-                self.kernel = self.kernel.reshape(1,1,33,33) #self.kernel = self.kernel.expand(self.channels, -1, -1, -1) 

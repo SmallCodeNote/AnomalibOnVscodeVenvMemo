@@ -1,21 +1,29 @@
+import os
+from anomalib import TaskType
 from anomalib.data import Folder
 from anomalib.models import Patchcore
 from anomalib.engine import Engine
 from anomalib.deploy.export import ExportType
+from anomalib.data.utils import TestSplitMode, ValSplitMode
 
 if __name__ == '__main__':
 
-    ckpt_path = R"R:\model"
-    onnx_path = R"R:\model"
-    vino_path = R"R:\model"
+    model_path = R"R:\model1"
+    if not os.path.exists(model_path):
+        os.makedirs(model_path)
 
     datamodule = Folder(
         name="Type1",
-        root=R"R:\train",
+        root=R"R:\train1",
         normal_dir="good",
-        mask_dir="mask",
-        abnormal_dir="ng",
-        normal_split_ratio=0.2,
+        normal_split_ratio = 0.0, #0.2,
+        mask_dir = "mask",
+        abnormal_dir = "ng",
+
+        task = TaskType.SEGMENTATION,
+
+        test_split_mode = TestSplitMode.NONE,
+        val_split_mode = ValSplitMode.FROM_TRAIN,
     )
 
     datamodule.setup()
@@ -27,9 +35,9 @@ if __name__ == '__main__':
     # Train and Test the model
     engine.fit(datamodule=datamodule, model=model, ckpt_path=None)
     
-    engine.export(model=model,export_type=ExportType.TORCH,export_root=ckpt_path)
-    engine.export(model=model,export_type=ExportType.ONNX,export_root=onnx_path)
-    engine.export(model=model,export_type=ExportType.OPENVINO ,export_root=vino_path)
+    engine.export(model=model,export_type=ExportType.TORCH,export_root=model_path)
+    engine.export(model=model,export_type=ExportType.ONNX,export_root=model_path)
+    engine.export(model=model,export_type=ExportType.OPENVINO ,export_root=model_path)
     
     engine.test(datamodule=datamodule, model=model, ckpt_path=None, verbose=True)
 

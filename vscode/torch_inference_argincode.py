@@ -1,5 +1,5 @@
 import logging
-from argparse import ArgumentParser, Namespace
+from argparse import Namespace
 from pathlib import Path
 
 import torch
@@ -39,12 +39,12 @@ def infer(args: Namespace) -> None:
 
 if __name__ == "__main__":
     args = Namespace(
-        weights=Path(R"R:\model\weights\torch\model.pt"), 
-        input=Path(R"R:\train\ng\0000.jpg"), 
-        output=Path(R"R:\result\0000.jpg"),
+        weights=Path(R"R:\model1\weights\torch\model.pt"), 
+        input=Path(R"R:\train1\ng"),  # set input directory
+        output=Path(R"R:\result1"),  # set output directory
         device='auto',  #["auto", "cpu", "gpu", "cuda"]
         task='segmentation',  #["classification", "detection", "segmentation"]
         visualization_mode='full', #["full", "simple"]
-        show=True 
+        show=False 
     )
     infer(args=args)
