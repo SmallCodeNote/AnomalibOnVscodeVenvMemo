@@ -40,8 +40,8 @@ def infer(args: Namespace) -> None:
 if __name__ == "__main__":
     args = Namespace(
         weights=Path(R"R:\model1\weights\torch\model.pt"), 
-        input=Path(R"R:\train1\ng"),  # set input directory
-        output=Path(R"R:\result1"),  # set output directory
+        input=Path(R"R:\train1\ng"),  #input directory
+        output=Path(R"R:\result1"),  #output directory
         device='auto',  #["auto", "cpu", "gpu", "cuda"]
         task='segmentation',  #["classification", "detection", "segmentation"]
         visualization_mode='full', #["full", "simple"]
