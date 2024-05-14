@@ -81,7 +81,7 @@ namespace OnnxRuntime_AnomalibInference
 
             if (ofd.ShowDialog() != DialogResult.OK) return;
 
-            textBox_ImageFilesPath.Text = string.Join("\r\n", ofd.FileNames);
+            textBox_ImageFilesPath.Text += string.Join("\r\n", ofd.FileNames)+"\r\n";
         }
 
         private void button_Run_Click(object sender, EventArgs e)
@@ -90,54 +90,109 @@ namespace OnnxRuntime_AnomalibInference
             string[] imageFilePaths = textBox_ImageFilesPath.Text.Replace("\r\n", "\n").Trim('\n').Split('\n');
 
             textBox_Result.Text = "";
-            panelImagesReset();
+            panelImagesResetHorizontal();
+
             foreach (var imageFilePath in imageFilePaths)
             {
                 string Score = "";
                 Bitmap bitmap;
 
-                (Score, bitmap) = OnnxImageClassification.RunSessionAndDrawMap(onnxFilePath, imageFilePath, ImShow: false);
-                string name = Path.Combine(Path.GetFileName(Path.GetDirectoryName(imageFilePath)), Path.GetFileNameWithoutExtension(imageFilePath));
-
-                textBox_Result.Text += name
-                    + "\t" + Score + "\r\n";
-                panelImageAdd(bitmap,name + " : " + Score);
-            }
-        }
-        private void panelImagesReset()
-        {
-
-            foreach (var control in panel_Images.Controls)
-            {
-                if (control is PictureBox)
+                float alpha = 0;
+                if (!float.TryParse(textBox_alpha.Text, out alpha))
                 {
-                    ((PictureBox)control).Image.Dispose();
-                }
-                
-            }
-            panel_Images.Controls.Clear();
-            panel_Images.Height = 0;
+                    alpha = 0;
+                };
 
+                float beta = 0;
+                if (!float.TryParse(textBox_beta.Text, out beta))
+                {
+                    beta = float.NaN;
+                };
+
+                float viewWidth = panel_Images.Width;
+                if(!float.TryParse(textBox_viewWidth.Text,out viewWidth))
+                {
+                    viewWidth = float.NaN;
+                }
+
+                (Score, bitmap) = OnnxImageClassification.RunSessionAndDrawMap(onnxFilePath, imageFilePath, alpha, beta, ImShow: false);
+
+                string name = Path.Combine(Path.GetFileName(Path.GetDirectoryName(imageFilePath)), Path.GetFileNameWithoutExtension(imageFilePath));
+                textBox_Result.Text += name + "\t" + Score + "\r\n";
+                
+                panelImageAddHorizontal(bitmap, name + " : " + Score, viewWidth);
+
+                if (Directory.Exists(textBox_MapSaveDirectory.Text))
+                {
+                    string mapFilePath = Path.Combine(textBox_MapSaveDirectory.Text, name+"_"+ Score.Split('\t')[0] + ".png");
+                    if (!Directory.Exists(Path.GetDirectoryName(mapFilePath))) { Directory.CreateDirectory(Path.GetDirectoryName(mapFilePath)); }
+
+                    bitmap.Save(mapFilePath);
+                }
+            }
         }
-        private void panelImageAdd(Bitmap bitmap,string name)
+
+        private void panelImagesResetHorizontal()
         {
+            panel_Images.Controls.Clear();
+            panel_Images.Width = 0;
+        }
+
+        private void panelImageAddHorizontal(Bitmap bitmap, string name, float viewHeightFloat)
+        {
+            int viewHeight = (int)viewHeightFloat;
+            if (float.IsNaN(viewHeightFloat))
+            {
+                viewHeight = panel_Images.Height;
+            }
+
             Label label = new Label();
-            label.Top = panel_Images.Height;
+            label.Left = panel_Images.Width;
             label.Text = name;
+            label.Height = 12;
 
             PictureBox pictureBox = new PictureBox();
-            pictureBox.Width = panel_Images.Width;
-            pictureBox.Height = (int)((bitmap.Height * panel_Images.Width) / bitmap.Width );
+            pictureBox.Height = viewHeight;
+            pictureBox.Width = (int)((bitmap.Width * viewHeight) / bitmap.Height);
             pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBox.Image = bitmap;
-            pictureBox.Top = panel_Images.Height+10;
-            
-            panel_Images.Height += pictureBox.Height+10;
+            pictureBox.Left = panel_Images.Width;
+            pictureBox.Top = label.Height;
 
-            panel_Images.Controls.Add(pictureBox);
+            panel_Images.Width += pictureBox.Width + label.Height;
+
+            if (panel_Images.Height < pictureBox.Height+ label.Height) { panel_Images.Height = pictureBox.Height+ label.Height; }
+
             panel_Images.Controls.Add(label);
-
+            panel_Images.Controls.Add(pictureBox);
         }
 
+        private void button_ClearImageFiles_Click(object sender, EventArgs e)
+        {
+            textBox_ImageFilesPath.Text = "";
+        }
+
+        private void Form1_SizeChanged(object sender, EventArgs e)
+        {
+            panel_ImagesFrame.Height = 160 + (this.Height - 600);
+        }
+
+        private void button_SavePanel_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "PNG|*.png";
+
+            if (sfd.ShowDialog() != DialogResult.OK) return;
+
+            Control c = panel_Images;
+            int w = c.Size.Width; 
+            int h = c.Size.Height;
+
+            using (Bitmap bmp = new Bitmap(w, h))
+            {
+                c.DrawToBitmap(bmp, new Rectangle(0, 0, w, h));
+                bmp.Save(sfd.FileName, System.Drawing.Imaging.ImageFormat.Png);
+            }
+        }
     }
 }
