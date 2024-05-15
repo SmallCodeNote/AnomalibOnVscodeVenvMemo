@@ -105,7 +105,7 @@
             this.button_LoadImageFiles.Name = "button_LoadImageFiles";
             this.button_LoadImageFiles.Size = new System.Drawing.Size(23, 21);
             this.button_LoadImageFiles.TabIndex = 4;
-            this.button_LoadImageFiles.Text = "...";
+            this.button_LoadImageFiles.Text = "+";
             this.button_LoadImageFiles.UseVisualStyleBackColor = true;
             this.button_LoadImageFiles.Click += new System.EventHandler(this.button_LoadImageFiles_Click);
             // 
