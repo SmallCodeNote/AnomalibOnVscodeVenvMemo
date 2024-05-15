@@ -13,37 +13,37 @@ namespace OnnxRuntime_ImageClassification
 {
     class OnnxImageClassification
     {
-        static public string RunSession(string onnxFilePath, string imageFilePath, bool ImShow = false)
+        static public string RunSession(string onnxFilePath, string imageFilePath, float alpha = 0, float beta = float.NaN, bool ImShow = false)
         {
             Mat imgSrc = Cv2.ImRead(imageFilePath, ImreadModes.Color);
 
             int inputWidth = imgSrc.Width;
             int inputHeight = imgSrc.Height;
-            Bitmap imgMap = new Bitmap(inputWidth,inputHeight);
+            Bitmap imgMap = new Bitmap(inputWidth, inputHeight);
             string dstString = "";
-            (dstString, imgMap) = RunSessionAndDrawMap(onnxFilePath, imgSrc, ImShow);
+            (dstString, imgMap) = RunSessionAndDrawMap(onnxFilePath, imgSrc, alpha, beta, ImShow);
             imgSrc.Dispose();
             imgMap.Dispose();
             return dstString;
         }
 
-        static public (string, Bitmap) RunSessionAndDrawMap(string onnxFilePath, string imageFilePath, bool ImShow = false)
+        static public (string, Bitmap) RunSessionAndDrawMap(string onnxFilePath, string imageFilePath, float alpha = 0, float beta = float.NaN, bool ImShow = false)
         {
             using (Mat imgSrc = new Mat(imageFilePath))
             {
-                return RunSessionAndDrawMap(onnxFilePath, imgSrc, ImShow);
+                return RunSessionAndDrawMap(onnxFilePath, imgSrc, alpha, beta, ImShow);
             }
         }
 
-        static public (string, Bitmap) RunSessionAndDrawMap(string onnxFilePath, Mat imgSrc, bool ImShow = false)
+        static public (string, Bitmap) RunSessionAndDrawMap(string onnxFilePath, Mat imgSrc, float alpha = 0, float beta = float.NaN, bool ImShow = false)
         {
             using (var session = new InferenceSession(onnxFilePath))
             {
-                return RunSessionAndDrawMap(session, imgSrc, ImShow);
+                return RunSessionAndDrawMap(session, imgSrc, alpha, beta, ImShow);
             }
         }
 
-        static public (string, Bitmap) RunSessionAndDrawMap(InferenceSession session, Mat imgSrc, bool ImShow = false)
+        static public (string, Bitmap) RunSessionAndDrawMap(InferenceSession session, Mat imgSrc, float alpha = 0, float beta = float.NaN, bool ImShow = false)
         {
             int inputWidth = imgSrc.Width;
             int inputHeight = imgSrc.Height;
@@ -66,14 +66,6 @@ namespace OnnxRuntime_ImageClassification
 
             using (var results = session.Run(inputs))
             {
-                Tensor<float> scores = results[1].AsTensor<float>();
-
-                int indicesLength = (int)scores.Length;
-                for (int i = 0; i < indicesLength; i++)
-                {
-                    var score = scores[0];
-                    LineOutput.Add(score.ToString("g4"));
-                }
 
                 Tensor<float> segmentationImage = results[0].AsTensor<float>();
 
@@ -92,13 +84,39 @@ namespace OnnxRuntime_ImageClassification
                     }
                 }
 
-                colorMap = floatMap.Normalize(0, 255, NormTypes.MinMax, MatType.CV_8UC1);
+                double minDouble = 0;
+                double maxDouble = 0;
+                if (float.IsNaN(beta)) {
+                    floatMap.MinMaxIdx(out minDouble, out maxDouble);
+                    beta = (float)minDouble;
+                }
+
+                if (alpha == 0)
+                {
+                    colorMap = floatMap.Normalize(0, 255, NormTypes.MinMax, MatType.CV_8UC1);
+                }
+                else
+                {
+                    floatMap.ConvertTo(colorMap, MatType.CV_8UC1, alpha, beta);
+                }
+
                 Cv2.ApplyColorMap(colorMap, colorMap, ColormapTypes.Jet);
                 Cv2.AddWeighted(imgSrc, 0.5, colorMap, 0.5, 0, colorMixMap);
 
                 colorMap.Dispose();
+
+
+                Tensor<float> scores = results[1].AsTensor<float>();
+
+                int indicesLength = (int)scores.Length;
+                for (int i = 0; i < indicesLength; i++)
+                {
+                    var score = scores[0];
+                    LineOutput.Add(score.ToString("g4")+"\t"+ minDouble.ToString("g4") + "\t" +maxDouble.ToString("g4"));
+                }
+
             }
-            return (string.Join("\t", LineOutput.Take(3).ToArray()), OpenCvSharp.Extensions.BitmapConverter.ToBitmap( colorMixMap));
+            return (string.Join("\t", LineOutput.Take(3).ToArray()), OpenCvSharp.Extensions.BitmapConverter.ToBitmap(colorMixMap));
         }
 
         static private DenseTensor<float> getDenseTensorFromMat(Mat src, int tensorWidth, int tensorHeight)
