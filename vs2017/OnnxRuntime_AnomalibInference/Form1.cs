@@ -23,7 +23,6 @@ namespace OnnxRuntime_AnomalibInference
         {
             InitializeComponent();
             thisExeDirPath = Path.GetDirectoryName(Application.ExecutablePath);
-
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -42,7 +41,6 @@ namespace OnnxRuntime_AnomalibInference
                     WinFormStringCnv.setControlFromString(this, File.ReadAllText(paramFilename));
                 }
             }
-
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -54,7 +52,6 @@ namespace OnnxRuntime_AnomalibInference
 
             if (false && sfd.ShowDialog() == DialogResult.OK)
             {
-
                 File.WriteAllText(sfd.FileName, FormContents);
             }
             else
@@ -62,7 +59,6 @@ namespace OnnxRuntime_AnomalibInference
                 string paramFilename = Path.Combine(thisExeDirPath, "_param.txt");
                 File.WriteAllText(paramFilename, FormContents);
             }
-
         }
 
         private void button_LoadOnnxFilePath_Click(object sender, EventArgs e)
@@ -71,7 +67,6 @@ namespace OnnxRuntime_AnomalibInference
             ofd.Filter = "ONNX|*.onnx";
 
             if (ofd.ShowDialog() != DialogResult.OK) return;
-
             textBox_OnnxFilePath.Text = ofd.FileName;
         }
 
@@ -92,19 +87,17 @@ namespace OnnxRuntime_AnomalibInference
             {
                 panel_Images.Controls.Clear();
                 panel_Images.Width = 0;
-
-                if (!int.TryParse(textBox_panelWidth.Text, out panelImageAddHorizontalMaxWidth))
-                {
-                    panelImageAddHorizontalMaxWidth = panel_ImagesFrame.Width;
-                }
             }
         }
 
-        int panelImageAddHorizontalMaxWidth = 512;
-
-
         private void panelImageAddHorizontal(Bitmap bitmap, string name, float viewHeightFloat, string imageFilePath, string[] imageFilePaths)
         {
+            int panelImageAddHorizontalMaxWidth = 512;
+            if (!int.TryParse(textBox_panelWidth.Text, out panelImageAddHorizontalMaxWidth))
+            {
+                panelImageAddHorizontalMaxWidth = panel_ImagesFrame.Width;
+            }
+
             if (this.InvokeRequired) { this.Invoke((Action)(() => panelImageAddHorizontal(bitmap, name, viewHeightFloat, imageFilePath, imageFilePaths))); }
             else
             {
@@ -135,6 +128,7 @@ namespace OnnxRuntime_AnomalibInference
 
                 label.Width = pictureBox.Width;
 
+
                 int panelImageAddHorizontalTop = iY * (pictureBox.Height + label.Height * 2);
                 int panelImageAddHorizontalLeft = iX * (pictureBox.Width + label.Height);
 
@@ -160,12 +154,10 @@ namespace OnnxRuntime_AnomalibInference
         {
             panel_ImagesFrame.Height = 160 + (this.Height - 600);
             panel_ImagesFrame.Width = (this.Width - (929-868));
-
         }
 
         private void button_Run_Click(object sender, EventArgs e)
         {
-
             if (button_Run.Text == "Run")
             {
                 button_Run.Text = "Stop";
@@ -189,8 +181,6 @@ namespace OnnxRuntime_AnomalibInference
             panelImagesResetHorizontal();
             ResultDictionary = new ConcurrentDictionary<string, string>();
 
-
-            //foreach (var imageFilePath in imageFilePaths)
             Parallel.ForEach(imageFilePaths, (imageFilePath) =>
             {
                 string Score = "";
@@ -219,7 +209,6 @@ namespace OnnxRuntime_AnomalibInference
                 string name = Path.Combine(Path.GetFileName(Path.GetDirectoryName(imageFilePath)), Path.GetFileNameWithoutExtension(imageFilePath));
                 ResultText += name + "\t" + Score + "\r\n";
                 ResultDictionary.TryAdd(name, name + "\t" + Score);
-                //ResultDictionary.AddOrUpdate(name, name + "\t" + Score, null);
 
                 panelImageAddHorizontal(bitmap, name + " : " + Score, viewWidth, imageFilePath, imageFilePaths);
 
@@ -227,7 +216,6 @@ namespace OnnxRuntime_AnomalibInference
                 {
                     string mapFilePath = Path.Combine(textBox_MapSaveDirectory.Text, name + "_" + Score.Split('\t')[0] + ".png");
                     if (!Directory.Exists(Path.GetDirectoryName(mapFilePath))) { Directory.CreateDirectory(Path.GetDirectoryName(mapFilePath)); }
-
                     bitmap.Save(mapFilePath);
                 }
 
@@ -238,8 +226,8 @@ namespace OnnxRuntime_AnomalibInference
                 }
 
                 ProgressText = ResultDictionary.Count.ToString() + " / " + imageFilePaths.Length.ToString();
-            });
 
+            });
 
             List<string> ResultList = new List<string>();
 
@@ -252,7 +240,6 @@ namespace OnnxRuntime_AnomalibInference
                     ResultList.Add(ResultDictionary[name]);
                 }
             }
-
             ResultText = string.Join("\r\n", ResultList);
         }
 
@@ -287,8 +274,6 @@ namespace OnnxRuntime_AnomalibInference
 
         private void backgroundWorker_Run_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-
-
             button_Run.Text = "Run";
         }
 

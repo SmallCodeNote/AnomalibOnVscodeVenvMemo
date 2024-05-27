@@ -66,7 +66,6 @@ namespace OnnxRuntime_ImageClassification
 
             using (var results = session.Run(inputs))
             {
-
                 Tensor<float> segmentationImage = results[0].AsTensor<float>();
 
                 int height = imgSrc.Height;
@@ -80,13 +79,14 @@ namespace OnnxRuntime_ImageClassification
                     {
                         float pixelValue = segmentationImage[0, 0, 0, y * width + x];
                         floatMap.Set(y, x, pixelValue);
-
                     }
                 }
 
                 double minDouble = 0;
                 double maxDouble = 0;
-                if (float.IsNaN(beta)) {
+
+                if (float.IsNaN(beta))
+                {
                     floatMap.MinMaxIdx(out minDouble, out maxDouble);
                     beta = (float)minDouble;
                 }
@@ -112,7 +112,7 @@ namespace OnnxRuntime_ImageClassification
                 for (int i = 0; i < indicesLength; i++)
                 {
                     var score = scores[0];
-                    LineOutput.Add(score.ToString("g4")+"\t"+ minDouble.ToString("g4") + "\t" +maxDouble.ToString("g4"));
+                    LineOutput.Add(score.ToString("g4") + "\t" + minDouble.ToString("g4") + "\t" + maxDouble.ToString("g4"));
                 }
 
             }
@@ -121,10 +121,9 @@ namespace OnnxRuntime_ImageClassification
 
         static private DenseTensor<float> getDenseTensorFromMat(Mat src, int tensorWidth, int tensorHeight)
         {
-            var dstTensor = new DenseTensor<float>(new[] { 1, 3, tensorWidth, tensorHeight });
-
-            OpenCvSharp.Size newSize = new OpenCvSharp.Size(tensorWidth, tensorHeight);
             Mat dst = new Mat();
+            var dstTensor = new DenseTensor<float>(new[] { 1, 3, tensorWidth, tensorHeight });
+            OpenCvSharp.Size newSize = new OpenCvSharp.Size(tensorWidth, tensorHeight);
             Cv2.Resize(src, dst, newSize);
 
             for (int y = 0; y < tensorHeight; y++)
@@ -141,6 +140,5 @@ namespace OnnxRuntime_ImageClassification
             dst.Dispose();
             return dstTensor;
         }
-
     }
 }
