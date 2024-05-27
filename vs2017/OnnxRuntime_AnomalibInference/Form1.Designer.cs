@@ -48,6 +48,11 @@
             this.label6 = new System.Windows.Forms.Label();
             this.button_ClearImageFiles = new System.Windows.Forms.Button();
             this.button_SavePanel = new System.Windows.Forms.Button();
+            this.backgroundWorker_Run = new System.ComponentModel.BackgroundWorker();
+            this.label7 = new System.Windows.Forms.Label();
+            this.textBox_panelWidth = new System.Windows.Forms.TextBox();
+            this.label_Progress = new System.Windows.Forms.Label();
+            this.button_SendClip = new System.Windows.Forms.Button();
             this.panel_ImagesFrame.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -231,13 +236,61 @@
             this.button_SavePanel.UseVisualStyleBackColor = true;
             this.button_SavePanel.Click += new System.EventHandler(this.button_SavePanel_Click);
             // 
+            // backgroundWorker_Run
+            // 
+            this.backgroundWorker_Run.WorkerReportsProgress = true;
+            this.backgroundWorker_Run.WorkerSupportsCancellation = true;
+            this.backgroundWorker_Run.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker_Run_DoWork);
+            this.backgroundWorker_Run.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker_Run_ProgressChanged);
+            this.backgroundWorker_Run.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker_Run_RunWorkerCompleted);
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(718, 82);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(63, 12);
+            this.label7.TabIndex = 14;
+            this.label7.Text = "panel width";
+            // 
+            // textBox_panelWidth
+            // 
+            this.textBox_panelWidth.Location = new System.Drawing.Point(783, 76);
+            this.textBox_panelWidth.Name = "textBox_panelWidth";
+            this.textBox_panelWidth.Size = new System.Drawing.Size(52, 19);
+            this.textBox_panelWidth.TabIndex = 15;
+            this.textBox_panelWidth.Text = "Nan";
+            // 
+            // label_Progress
+            // 
+            this.label_Progress.AutoSize = true;
+            this.label_Progress.Location = new System.Drawing.Point(199, 76);
+            this.label_Progress.Name = "label_Progress";
+            this.label_Progress.Size = new System.Drawing.Size(11, 12);
+            this.label_Progress.TabIndex = 17;
+            this.label_Progress.Text = "...";
+            // 
+            // button_SendClip
+            // 
+            this.button_SendClip.Location = new System.Drawing.Point(8, 415);
+            this.button_SendClip.Name = "button_SendClip";
+            this.button_SendClip.Size = new System.Drawing.Size(23, 21);
+            this.button_SendClip.TabIndex = 18;
+            this.button_SendClip.Text = "c";
+            this.button_SendClip.UseVisualStyleBackColor = true;
+            this.button_SendClip.Click += new System.EventHandler(this.button_SendClip_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(913, 561);
+            this.Controls.Add(this.button_SendClip);
+            this.Controls.Add(this.label_Progress);
             this.Controls.Add(this.button_SavePanel);
+            this.Controls.Add(this.textBox_panelWidth);
             this.Controls.Add(this.textBox_viewWidth);
+            this.Controls.Add(this.label7);
             this.Controls.Add(this.textBox_beta);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.textBox_alpha);
@@ -288,6 +341,11 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button button_ClearImageFiles;
         private System.Windows.Forms.Button button_SavePanel;
+        private System.ComponentModel.BackgroundWorker backgroundWorker_Run;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TextBox textBox_panelWidth;
+        private System.Windows.Forms.Label label_Progress;
+        private System.Windows.Forms.Button button_SendClip;
     }
 }
 
